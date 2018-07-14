@@ -60,13 +60,14 @@ class FDROriginal:
         #     if second input is present, use it as the random seed
         #     this allows the use of the same detaset between trails
 
-        inp = 0.5 * np.random.uniform(low=0.0, high=1.0, size=self.k)
-        outp = np.zeros(self.k)
+        input = 0.5 * np.random.uniform(low=0.0, high=1.0, size=self.k)
+        outpout = np.zeros(self.k)
 
         for i in range(9, self.k-1):
-            outp[i+1] = 0.3 * outp[i] + 0.05 * outp[i] * sum(outp[i-9:i]) + 1.5 * inp[i] * inp[i-9] + 0.1
+            outpout[i+1] = 0.3 * outpout[i]\
+                           + 0.05 * outpout[i] * sum(outpout[i-9:i]) + 1.5 * input[i] * input[i-9] + 0.1
 
-        return inp, outp
+        return input, outpout
 
     # Defining mask and masking the input
     def mask(self):
@@ -164,7 +165,7 @@ class FDROriginal:
         plt.figure(2)
         plt.plot(x2, self.output_train, marker='o', c=np.random.rand(3,))
         plt.plot(x2, self.target1, marker='x', c=np.random.rand(3,))
-        plt.xlabel('o: Reservoir, x:Actual')
+        plt.xlabel('o: Reservoir, x: Actual')
         plt.grid()
         plt.title('Train: Reservoir Output vs Actual Output for NARMA-input')
 
