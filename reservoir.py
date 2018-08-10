@@ -1,6 +1,7 @@
 import numpy as np
 import LIF1
 import PSDD1
+import prepare_data
 
 
 class Reservoir(object):
@@ -84,3 +85,22 @@ class Reservoir(object):
                     self.rate[i, j] = np.count_nonzero(TT)
 
         return self.XX, self.rate
+
+
+def main():
+    d1 = prepare_data.DFRSpiking()
+    d1.import_images()
+    d1.apply_encoding()
+    d1.assign_ts()
+    ipsc = d1.assign_IPSC()
+    a = np.amax(ipsc)
+    b = np.amin(ipsc)
+    print(a, b)
+    reservoir = Reservoir(ipsc)
+    xx, rate = reservoir.assign_values()
+    print(xx)
+    print(rate)
+
+
+if __name__ == '__main__':
+    main()

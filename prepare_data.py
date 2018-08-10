@@ -24,24 +24,25 @@ class DFRSpiking:
     def sp_noise(self, image, prob):
         sh = image.shape
         output = np.zeros(sh, np.uint8)
-        thres = 1 - prob
         for i in range(image.shape[0]):
             for j in range(image.shape[1]):
-                rdn = random.random()
-                if rdn < prob:
-                    output[i][j] = 0
-                elif rdn > thres:
-                    output[i][j] = 255
+                rand1 = random.random()
+                if rand1 < prob:
+                    rand2 = random.random()
+                    if rand2 < 0.5:
+                        output[i][j] = 0
+                    else:
+                        output[i][j] = 255
                 else:
                     output[i][j] = image[i][j]
         return output
 
     def test_noise(self):
-        im = plt.imread('1.jpg')
-        ret = self.sp_noise(im, 0.9)
-        img = Image.fromarray(ret, 'L')
-        img.save('noised_1.jpg')
-        img.show()
+        for i in range(18):
+            im = plt.imread(str(i + 1) + '.jpg')
+            im = self.sp_noise(im, 0.9)
+            img = Image.fromarray(im, 'L')
+            img.save('noised_' + str(i + 1) + '.jpg')
 
     def encoding(self, value):
         return np.array((value/9, value*2/9, value/9))
@@ -80,15 +81,12 @@ class DFRSpiking:
 
 def main():
     d1 = DFRSpiking()
-    d1.import_images()
-
-    d1.apply_encoding()
-    # print(d1.D1)
-    d1.assign_ts()
-    ipsc = d1.assign_IPSC()  # pass this ipsc to next package reservior.m
-    # Design: make reservior and NN train as two classes, just pass matrix
-    r1 = reservoir.Reservoir(ipsc)
-    XX0delay20test, Rate0Delay20test = r1.assign_values()
+    d1.test_noise()
+    # d1.import_images()
+    # d1.apply_encoding()
+    # d1.assign_ts()
+    # ipsc = d1.assign_IPSC()  # pass this ipsc to next package reservior.m
+    # print(ipsc)
 
 
 if __name__ == '__main__':

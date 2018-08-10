@@ -1,5 +1,4 @@
 import numpy as np
-import DynamicArray
 
 
 def LIF1(Isyn):
@@ -19,23 +18,19 @@ def LIF1(Isyn):
     I = 1.5  # input current (A)
     t = 0
 
-    TT = DynamicArray.DynamicArray()
+    TT = np.array([])
     k = 0
     for i in range(len(time)):  # in enumerate(time)
         if t > t_rest:
             Vm[i + 1] = Vm[i] + (-Vm[i] + Isyn[i]*Rm) / tau_m * dt
             if Vm[i].all() >= Vth:
                 Vm[i + 1] = Vm[i] + V_spike
-                TT.append(t)
+                TT = np.append(TT, t)
                 t_rest = t + tau_ref
                 k += 1
         t += dt
-    O = []
-    for i in range(len(TT)):
-        O.append(TT[i])
-    out = np.array(O)
-    Vout = Vm
-    return Vout, out[0:9]
+
+    return Vm, TT
 
 
 def main():
