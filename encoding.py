@@ -13,7 +13,7 @@ def encoding(J1):
     A1 = Iext - Ileak
 
     # Parameters
-    N = 3  # must always be >=2
+    N = 3  # must always be >=2, number of intervals
     beta = 3
 
     # Encoder

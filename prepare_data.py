@@ -4,15 +4,15 @@ import random
 from PIL import Image
 # import encoding
 import PSDD
-import reservoir
 
 
 class DFRSpiking:
 
-    b = np.zeros((18, 4096))
-    D1 = np.zeros((18, 4096, 3))
-    TS = np.zeros((18, 4096, 3))
-    IPSC = np.zeros((18, 4096, 76))
+    def __init__(self):
+        self.b = np.zeros((18, 4096))
+        self.D1 = np.zeros((18, 4096, 3))  # intervals between spikes
+        self.TS = np.zeros((18, 4096, 3))  # time of spikes, real timestamps
+        self.IPSC = np.zeros((18, 4096, 76))  # stores analog data
 
     def import_images(self):
         for i in range(18):
@@ -45,18 +45,13 @@ class DFRSpiking:
             img.save('noised_' + str(i + 1) + '.jpg')
 
     def encoding(self, value):
+        # convert pixels to spikes
         return np.array((value/9, value*2/9, value/9))
 
     def apply_encoding(self):
         for i in range(18):
             for j in range(4096):
                 self.D1[i, j, :] = self.encoding(self.b[i, j])
-
-    # def apply_encoding(self, array):
-    #     ret = np.zeros((len(array), 3))
-    #     for i in range(len(array)):
-    #         ret[i, :] = self.encoding(array[i])
-    #     return ret
 
     def test_encoding(self):
         im = plt.imread('1.jpg')
@@ -81,12 +76,11 @@ class DFRSpiking:
 
 def main():
     d1 = DFRSpiking()
-    d1.test_noise()
-    # d1.import_images()
-    # d1.apply_encoding()
-    # d1.assign_ts()
-    # ipsc = d1.assign_IPSC()  # pass this ipsc to next package reservior.m
-    # print(ipsc)
+    d1.import_images()
+    d1.apply_encoding()
+    d1.assign_ts()
+    ipsc = d1.assign_IPSC()  # pass this ipsc to next package reservior.m
+    print(ipsc)
 
 
 if __name__ == '__main__':

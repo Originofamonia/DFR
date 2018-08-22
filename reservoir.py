@@ -14,7 +14,7 @@ class Reservoir(object):
         self.X2 = np.zeros((18, 4096, 13))
         self.X3 = np.zeros((18, 4096, 13))
         self.X4 = np.zeros((18, 4096, 13))
-        self.rate = np.zeros((4096, 4096))
+        # self.rate = np.zeros((4096, 4096))
         self.SPIKE = np.zeros((76, 76))
         # self.TT = np.zeros(6)
         self.Inew = np.zeros((18, 4096, 76))
@@ -30,7 +30,7 @@ class Reservoir(object):
                     self.X3[0, i, 0:len(TT)] = TT + 60
                     self.X4[0, i, 0:len(TT)] = TT + 80
                     self.Inew[0, i, :] = PSDD1.PSDD1(TT)
-                    self.rate[i, j] = np.count_nonzero(TT)
+                    # self.rate[i, j] = np.count_nonzero(TT)
                 else:
                     self.SPIKE, TT = LIF1.LIF1(16 * self.Data[j, i, :]
                                                + 0.8 * self.Inew[j-1, i, :])
@@ -40,7 +40,7 @@ class Reservoir(object):
                     self.X3[j, i, 0:len(TT)] = TT + 60
                     self.X4[j, i, 0:len(TT)] = TT + 80
                     self.Inew[j, i, :] = PSDD1.PSDD1(self.X4[j, i, 0: len(TT)])
-                    self.rate[i, j] = np.count_nonzero(TT)
+                    # self.rate[i, j] = np.count_nonzero(TT)
 
             for j in range(6, 12):
                 if j == 6:
@@ -51,7 +51,7 @@ class Reservoir(object):
                     self.X3[6, i, 0:len(TT)] = TT + 60
                     self.X4[6, i, 0:len(TT)] = TT + 80
                     self.Inew[6, i, :] = PSDD1.PSDD1(TT)
-                    self.rate[i, j] = np.count_nonzero(TT)
+                    # self.rate[i, j] = np.count_nonzero(TT)
                 else:
                     self.SPIKE, TT = LIF1.LIF1(16 * self.Data[j, i, :]
                                                + 0.8 * self.Inew[j - 1, i, :])
@@ -61,7 +61,7 @@ class Reservoir(object):
                     self.X3[j, i, 0:len(TT)] = TT + 60
                     self.X4[j, i, 0:len(TT)] = TT + 80
                     self.Inew[j, i, :] = PSDD1.PSDD1(self.X4[j, i, 0: len(TT)])
-                    self.rate[i, j] = np.count_nonzero(TT)
+                    # self.rate[i, j] = np.count_nonzero(TT)
 
             for j in range(12, 18):
                 if j == 12:
@@ -72,7 +72,7 @@ class Reservoir(object):
                     self.X3[12, i, 0:len(TT)] = TT + 60
                     self.X4[12, i, 0:len(TT)] = TT + 80
                     self.Inew[12, i, :] = PSDD1.PSDD1(TT)
-                    self.rate[i, j] = np.count_nonzero(TT)
+                    # self.rate[i, j] = np.count_nonzero(TT)
                 else:
                     self.SPIKE, TT = LIF1.LIF1(16 * self.Data[j, i, :]
                                                + 0.8 * self.Inew[j - 1, i, :])
@@ -82,9 +82,9 @@ class Reservoir(object):
                     self.X3[j, i, 0:len(TT)] = TT + 60
                     self.X4[j, i, 0:len(TT)] = TT + 80
                     self.Inew[j, i, :] = PSDD1.PSDD1(self.X4[j, i, 0: len(TT)])
-                    self.rate[i, j] = np.count_nonzero(TT)
+                    # self.rate[i, j] = np.count_nonzero(TT)
 
-        return self.XX, self.rate
+        return self.XX
 
 
 def main():
@@ -93,13 +93,10 @@ def main():
     d1.apply_encoding()
     d1.assign_ts()
     ipsc = d1.assign_IPSC()
-    a = np.amax(ipsc)
-    b = np.amin(ipsc)
-    print(a, b)
+
     reservoir = Reservoir(ipsc)
-    xx, rate = reservoir.assign_values()
+    xx = reservoir.assign_values()
     print(xx)
-    print(rate)
 
 
 if __name__ == '__main__':

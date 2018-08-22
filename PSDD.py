@@ -1,7 +1,9 @@
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 
 
+# Convert spikes to analog signals, like DAC
 def PSDD(TS):
     tsp1 = TS
     t = np.arange(0, 152, 2)
@@ -26,9 +28,11 @@ def PSDD(TS):
 
 
 def main():
-    input = np.array((1, 2, 3))
-    ret = PSDD(input)
-    print(ret)
+    input = np.array((28.3333, 85, 113.3333))
+    ans = PSDD(input)
+    plt.plot(ans)
+    plt.grid()
+    plt.show()
 
 
 if __name__ == '__main__':
