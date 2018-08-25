@@ -71,6 +71,9 @@ class DFRSpiking:
         for i in range(18):
             for p in range(4096):
                 self.IPSC[i, p, :] = PSDD.PSDD(self.TS[i, p, :])
+
+        outfile = 'IPSC9delay30.npy'
+        np.save(outfile, self.IPSC)
         return self.IPSC
 
 
@@ -79,8 +82,7 @@ def main():
     d1.import_images()
     d1.apply_encoding()
     d1.assign_ts()
-    ipsc = d1.assign_IPSC()  # pass this ipsc to next package reservior.m
-    print(ipsc)
+    d1.assign_IPSC()
 
 
 if __name__ == '__main__':
