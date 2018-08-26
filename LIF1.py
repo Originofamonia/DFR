@@ -1,6 +1,7 @@
 import numpy as np
 
 
+# Convert analog to spikes
 def LIF1(Isyn):
     T = 150  # total time to simulate (msec)
     dt = 2  # simulation time step (msec)
@@ -36,7 +37,8 @@ def LIF1(Isyn):
 def main():
     infile = 'IPSC9delay30.npy'
     ipsc = np.load(infile)
-    TT = LIF1(ipsc[0, 78, :])
+    x = ipsc[0, 30, :]
+    TT = LIF1(16 * x)
     print(TT)
 
 

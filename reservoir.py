@@ -27,7 +27,7 @@ class Reservoir(object):
                     self.X2[0, i, 0:len(TT)] = TT + 40
                     self.X3[0, i, 0:len(TT)] = TT + 60
                     self.X4[0, i, 0:len(TT)] = TT + 80
-                    self.Inew[0, i, :] = PSDD1.PSDD1(TT)
+                    self.Inew[0, i, :] = PSDD1.psdd1(TT)
                 else:
                     TT = LIF1.LIF1(16 * self.Data[j, i, :] + 0.8 * self.Inew[j-1, i, :])
                     self.XX[j, i, 0:len(TT)] = TT
@@ -35,7 +35,7 @@ class Reservoir(object):
                     self.X2[j, i, 0:len(TT)] = TT + 40
                     self.X3[j, i, 0:len(TT)] = TT + 60
                     self.X4[j, i, 0:len(TT)] = TT + 80
-                    self.Inew[j, i, :] = PSDD1.PSDD1(self.X4[j, i, 0: len(TT)])
+                    self.Inew[j, i, :] = PSDD1.psdd1(self.X4[j, i, 0: len(TT)])
 
             for j in range(6, 12):
                 if j == 6:
@@ -45,7 +45,7 @@ class Reservoir(object):
                     self.X2[6, i, 0:len(TT)] = TT + 40
                     self.X3[6, i, 0:len(TT)] = TT + 60
                     self.X4[6, i, 0:len(TT)] = TT + 80
-                    self.Inew[6, i, :] = PSDD1.PSDD1(TT)
+                    self.Inew[6, i, :] = PSDD1.psdd1(TT)
                 else:
                     TT = LIF1.LIF1(16 * self.Data[j, i, :] + 0.8 * self.Inew[j - 1, i, :])
                     self.XX[j, i, 0:len(TT)] = TT
@@ -53,7 +53,7 @@ class Reservoir(object):
                     self.X2[j, i, 0:len(TT)] = TT + 40
                     self.X3[j, i, 0:len(TT)] = TT + 60
                     self.X4[j, i, 0:len(TT)] = TT + 80
-                    self.Inew[j, i, :] = PSDD1.PSDD1(self.X4[j, i, 0: len(TT)])
+                    self.Inew[j, i, :] = PSDD1.psdd1(self.X4[j, i, 0: len(TT)])
 
             for j in range(12, 18):
                 if j == 12:
@@ -63,7 +63,7 @@ class Reservoir(object):
                     self.X2[12, i, 0:len(TT)] = TT + 40
                     self.X3[12, i, 0:len(TT)] = TT + 60
                     self.X4[12, i, 0:len(TT)] = TT + 80
-                    self.Inew[12, i, :] = PSDD1.PSDD1(TT)
+                    self.Inew[12, i, :] = PSDD1.psdd1(TT)
                 else:
                     TT = LIF1.LIF1(16 * self.Data[j, i, :] + 0.8 * self.Inew[j - 1, i, :])
                     self.XX[j, i, 0:len(TT)] = TT
@@ -71,23 +71,28 @@ class Reservoir(object):
                     self.X2[j, i, 0:len(TT)] = TT + 40
                     self.X3[j, i, 0:len(TT)] = TT + 60
                     self.X4[j, i, 0:len(TT)] = TT + 80
-                    self.Inew[j, i, :] = PSDD1.PSDD1(self.X4[j, i, 0: len(TT)])
+                    self.Inew[j, i, :] = PSDD1.psdd1(self.X4[j, i, 0: len(TT)])
 
         outfile = 'XX0delay20test.npy'
         np.save(outfile, self.XX)
         return self.XX
 
     def test_data(self):
-        plt.plot(self.Data[0, 78, :], c=np.random.rand(3,))
-        plt.grid()
+        x = 0  # [0, 17]
+        y = 30  # [0, 4095]
+        num = 5
+        for i in range(num):
+            plt.subplot(num, 1, i + 1)
+            plt.plot(self.Data[x, y + i, :], c=np.random.rand(3,))
+            plt.grid()
         plt.show()
 
 
 def main():
     res = Reservoir()
-    res.test_data()
-    # xx = res.assign_values()
-    # print(xx)
+    # res.test_data()
+    xx = res.assign_values()
+    print(xx)
 
 
 if __name__ == '__main__':

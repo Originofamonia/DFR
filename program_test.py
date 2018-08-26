@@ -11,8 +11,15 @@ def function1():
     x2 = np.load(outfile)
     return x2
 
+
+def function2():
+    x = np.arange(9)
+    x2 = 16 * x
+    return x2
+
+
 def main():
-    ans = function1()
+    ans = function2()
     print(ans)
 
 
