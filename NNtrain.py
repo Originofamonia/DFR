@@ -3,15 +3,21 @@ import math
 
 
 class NNtrain:
-    def __init__(self, XX0delay20test):
+    def __init__(self):
+        infile_train = 'XX0delay20_train.npy'
+        infile_test = 'XX0delay20_test.npy'
+
+        # XX stores time of spikes, 18 is num of images, 4096 is num of pixels, and 13 is spikes of that pixel
+        # reshape to 53248, which is 4096 * 13
         self.Datatrain = np.zeros((18, 53248))
-        self.XX1 = XX0delay20test
+        self.XX1 = np.load(infile_train)
         self.Datatest = np.zeros((18, 53248))
-        self.XXtest = XX0delay20test
+        self.XXtest = np.load(infile_test)
         self.Aeta = 1e-3
         self.MaxE = 1e-2
         self.alpha = 0.7
 
+        # represent classes, but for the 18 images dataset, only 3 classes.
         self.DesireOutput = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
         self.randDesireOutput = np.zeros(2)
         self.P = len(self.Datatrain)
@@ -20,6 +26,7 @@ class NNtrain:
         self.HiddenLayer2 = 10
         self.NumofOutputNeuron = 2
 
+        #
         self.v1 = 0.01 * np.random.randn(self.NumofInputNeuron + 1, self.HiddenLayer1)
         self.Dv1 = np.zeros((self.NumofInputNeuron + 1, self.HiddenLayer1))
         self.v2 = 0.01 * np.random.randn(self.HiddenLayer1 + 1, self.HiddenLayer2)
@@ -38,11 +45,11 @@ class NNtrain:
     def assign_values(self):
         for i in range(18):
             for j in range(4096):
-                self.Datatrain[i, (j * 13): (j * 13 + 12)] = self.XX1[i, j, 0:13]
+                self.Datatrain[i, (j * 13): (j * 13 + 13)] = self.XX1[i, j, 0:13]
 
         for i in range(18):
             for j in range(4096):
-                self.Datatest[i, (j * 13): (j*13 + 12)] = self.XXtest[i, j, 0:13]
+                self.Datatest[i, (j * 13): (j * 13 + 13)] = self.XXtest[i, j, 0:13]
 
         for i in range(18):
             self.Datatrain[i, :] = (self.Datatrain[i, :] - np.mean(self.Datatrain[i, :])) \
@@ -56,7 +63,7 @@ class NNtrain:
         else:
             ret = np.array(x)
             for i in range(x):
-                ret[i] = 1/ (1 + math.exp(-x[i]))
+                ret[i] = 1 / (1 + math.exp(-x[i]))
 
             return ret
 
@@ -132,3 +139,13 @@ class NNtrain:
                 self.E1 = 0
                 self.p = 0
                 self.counter += 1
+
+
+def main():
+    nn = NNtrain()
+    nn.assign_values()
+    nn.train_nn()
+
+
+if __name__ == '__main__':
+    main()

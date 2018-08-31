@@ -5,11 +5,13 @@ import matplotlib.pyplot as plt
 
 
 class Reservoir(object):
-
+    # Build the reservoir
     def __init__(self):
-        infile = 'IPSC9delay30.npy'
+        infile = 'IPSC9delay30_test.npy'
         self.Data = np.load(infile)
         # self.gain = 0.8
+
+        # XX stores time of spikes, 18 is num of images, 4096 is num of pixels, and 13 is spikes of that pixel
         self.XX = np.zeros((18, 4096, 13))
         self.X1 = np.zeros((18, 4096, 13))
         self.X2 = np.zeros((18, 4096, 13))
@@ -73,13 +75,13 @@ class Reservoir(object):
                     self.X4[j, i, 0:len(TT)] = TT + 80
                     self.Inew[j, i, :] = PSDD1.psdd1(self.X4[j, i, 0: len(TT)])
 
-        outfile = 'XX0delay20test.npy'
+        outfile = 'XX0delay20_test.npy'
         np.save(outfile, self.XX)
         return self.XX
 
     def test_data(self):
-        x = 0  # [0, 17]
-        y = 30  # [0, 4095]
+        x = 0  # should be between [0, 17]
+        y = 30  # should be between [0, 4095]
         num = 5
         for i in range(num):
             plt.subplot(num, 1, i + 1)

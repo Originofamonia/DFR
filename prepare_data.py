@@ -17,8 +17,8 @@ class DFRSpiking:
     def import_images(self):
         for i in range(18):
             im = plt.imread(str(i + 1) + '.jpg')
-            im2 = self.sp_noise(im, 0.9)
-            im2 = np.reshape(im2, -1)
+            im = self.sp_noise(im, 0.5)  # add noise to test images, no noise to train images
+            im2 = np.reshape(im, -1)
             self.b[i] = im2
 
     def sp_noise(self, image, prob):
@@ -57,8 +57,6 @@ class DFRSpiking:
         im = plt.imread('1.jpg')
         im2 = self.sp_noise(im, 0.9)
         im2 = np.reshape(im2, -1)
-        # im3 = self.apply_encoding(im2)
-        # return im3
 
     def assign_ts(self):
         for i in range(18):
@@ -72,7 +70,7 @@ class DFRSpiking:
             for p in range(4096):
                 self.IPSC[i, p, :] = PSDD.PSDD(self.TS[i, p, :])
 
-        outfile = 'IPSC9delay30.npy'
+        outfile = 'IPSC9delay30_test.npy'
         np.save(outfile, self.IPSC)
         return self.IPSC
 
