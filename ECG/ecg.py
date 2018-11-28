@@ -14,8 +14,8 @@ class ECG:
         self.k = self.k1 + self.k2 + self.k3  # number of input data
         self.gain = 0.8  # feedback gain
         self.scale = 1  # input scaling
-        self.m = np.array(self.nv)
-        self.j = np.zeros(self.k * self.nv)
+        self.m = np.array(self.nv)  # random vector
+        self.j = np.zeros(self.k * self.nv)  # masked input?
 
         self.input = np.array(self.k)
         self.input1 = np.array(self.k1)  # initial input data
@@ -55,12 +55,12 @@ class ECG:
         self.target2 = self.target[self.k1 + self.k2:]
 
     # Defining mask and masking the input
-    def mask(self, isMask=True):
+    def mask(self, is_mask=True):
         # j is the masked input
         self.m = np.random.uniform(low=0.0, high=1.0, size=self.nv)
         it = np.nditer(self.input, flags=['f_index'])
         while not it.finished:
-            if isMask:
+            if is_mask:
                 masked_elem = np.dot(it[0], self.m)
             else:
                 masked_elem = np.repeat(it[0], self.nv)
@@ -188,7 +188,7 @@ class ECG:
 def main():
     e1 = ECG()
     e1.create_input_output()
-    e1.mask(isMask=False)
+    e1.mask(is_mask=False)
     e1.init_reservoir()
     e1.train_reservoir()
     e1.sample_feature()
