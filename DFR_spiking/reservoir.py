@@ -9,7 +9,6 @@ class Reservoir(object):
     def __init__(self):
         infile = 'IPSC9delay30_test.npy'
         self.Data = np.load(infile)
-        # self.gain = 0.8
 
         # XX stores time of spikes, 18 is num of images, 4096 is num of pixels, and 13 is spikes of that pixel
         self.XX = np.zeros((18, 4096, 13))
@@ -41,7 +40,7 @@ class Reservoir(object):
 
             for j in range(6, 12):
                 if j == 6:
-                    TT = LIF1.LIF1(16* self.Data[6, i, :])
+                    TT = LIF1.LIF1(16 * self.Data[6, i, :])
                     self.XX[6, i, 0:len(TT)] = TT
                     self.X1[6, i, 0:len(TT)] = TT + 20
                     self.X2[6, i, 0:len(TT)] = TT + 40
@@ -94,7 +93,7 @@ def main():
     res = Reservoir()
     # res.test_data()
     xx = res.assign_values()
-    print(xx)
+    # print(xx)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 # Convert analog to spikes
 def LIF1(Isyn):
@@ -35,10 +35,13 @@ def LIF1(Isyn):
 
 
 def main():
-    infile = 'IPSC9delay30.npy'
+    infile = 'IPSC9delay30_train.npy'
     ipsc = np.load(infile)
     x = ipsc[0, 30, :]
     TT = LIF1(16 * x)
+    plt.plot(x)
+    plt.show()
+    print(x)
     print(TT)
 
 

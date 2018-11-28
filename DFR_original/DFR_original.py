@@ -2,9 +2,10 @@
 import numpy as np
 from numpy import linalg as LA
 import matplotlib.pyplot as plt
+import csv
 
 
-class FDROriginal:
+class DFROriginal:
     # Parameters
     n = 10
     nv = n - 1
@@ -175,6 +176,9 @@ class FDROriginal:
         plt.xlabel('o: Reservoir, x: Actual')
         plt.grid()
         plt.title('Test: Reservoir Output vs Actual Output for NARMA-input')
+        # Below two lines are used to save the results.
+        # mat = np.column_stack((x2, self.output_test, self.target2))
+        # np.savetxt('narma10_result.csv', mat, delimiter=', ')
 
         plt.figure(4)
         plt.plot(x41, self.input1, c=np.random.rand(3,))
@@ -205,7 +209,7 @@ def test_divide():
 
 
 def main():
-    f1 = FDROriginal()
+    f1 = DFROriginal()
     f1.define_input_output()
     f1.mask()
     f1.init_reservoir()

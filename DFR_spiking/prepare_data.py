@@ -15,8 +15,8 @@ class DFRSpiking:
 
     def import_images(self):
         for i in range(18):
-            im = plt.imread(str(i + 1) + '.jpg')
-            im = self.sp_noise(im, 0.5)  # add noise to test images, no noise to train images
+            im = plt.imread('.\..\\' + str(i + 1) + '.jpg')
+            im = self.sp_noise(im, 0.3)  # add noise to test images, no noise to train images
             im2 = np.reshape(im, -1)
             self.b[i] = im2
 
@@ -38,12 +38,13 @@ class DFRSpiking:
 
     def test_noise(self):
         for i in range(18):
-            im = plt.imread(str(i + 1) + '.jpg')
-            im = self.sp_noise(im, 0.9)
+            im = plt.imread('.\..\\' + str(i + 1) + '.jpg')
+            im = self.sp_noise(im, 0.3)
             img = Image.fromarray(im, 'L')
             img.save('noised_' + str(i + 1) + '.jpg')
 
-    def encoding(self, value):
+    @staticmethod
+    def encoding(value):
         # convert pixels to spikes
         return np.array((value/9, value*2/9, value/9))
 
@@ -53,9 +54,11 @@ class DFRSpiking:
                 self.D1[i, j, :] = self.encoding(self.b[i, j])
 
     def test_encoding(self):
-        im = plt.imread('1.jpg')
-        im2 = self.sp_noise(im, 0.9)
-        im2 = np.reshape(im2, -1)
+        im = plt.imread('.\..\\1.jpg')
+        im = self.sp_noise(im, 0.3)
+        im = np.reshape(im, -1)
+        plt.plot(im[700:750], 'ro')
+        plt.show()
 
     def assign_ts(self):
         for i in range(18):
@@ -64,7 +67,7 @@ class DFRSpiking:
                 for t in range(1, 3):
                     self.TS[i, j, t] = self.TS[i, j, t-1] + self.D1[i, j, t]
 
-    def assign_IPSC(self):
+    def assign_ipsc(self):
         for i in range(18):
             for p in range(4096):
                 self.IPSC[i, p, :] = PSDD.PSDD(self.TS[i, p, :])
@@ -77,9 +80,11 @@ class DFRSpiking:
 def main():
     d1 = DFRSpiking()
     d1.import_images()
+    # d1.test_noise()
+    # d1.test_encoding()
     d1.apply_encoding()
     d1.assign_ts()
-    d1.assign_IPSC()
+    d1.assign_ipsc()
 
 
 if __name__ == '__main__':
