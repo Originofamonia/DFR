@@ -27,9 +27,9 @@ class ECG:
         # Reservoir parameters
         self.x = np.zeros(self.n)  # value in reservoir nodes
         self.x_next = np.zeros(self.n)
-        self.X = np.zeros((self.k2, self.n))
+        self.X = np.zeros((self.k2, self.n))  # training states
         self.x_all = np.zeros((self.k2 * self.nv, self.n))  # states in all nodes
-        self.reg = 1e-8
+        self.reg = 1e-8  # regularization coefficient
         self.w_out = np.zeros(self.n)
         self.temp = np.zeros(self.k2)
         self.temp2 = np.zeros(self.k2)
@@ -103,8 +103,8 @@ class ECG:
     # Compute training error
     def training_error(self):
         self.output_train = np.dot(self.w_out, np.transpose(self.X))
-        errorLen = self.k2
-        mse = (LA.norm(self.target1 - self.output_train, 2) ** 2) / errorLen
+        error_len = self.k2
+        mse = (LA.norm(self.target1 - self.output_train, 2) ** 2) / error_len
         nmse = (LA.norm(self.target1 - self.output_train) / LA.norm(self.target1)) ** 2
         return mse, nmse
 
@@ -146,7 +146,7 @@ class ECG:
         x43 = np.arange(self.k1 + self.k2, self.k, 1)
 
         plt.figure(1)
-        plt.plot(x1, self.j[self.k1 * self.nv: self.k1 * self.nv + 100], marker='x', c=np.random.rand(3, ))
+        plt.plot(self.j[self.k1 * self.nv: self.k1 * self.nv + 500], marker='x', c=np.random.rand(3, ))
         plt.grid()
         plt.title('Input after Masking')
 
@@ -188,8 +188,9 @@ class ECG:
 def main():
     e1 = ECG()
     e1.create_input_output()
-    e1.mask(is_mask=False)
+    e1.mask(is_mask=True)
     e1.init_reservoir()
+
     e1.train_reservoir()
     e1.sample_feature()
     e1.train_output_weights()
@@ -212,5 +213,5 @@ gpu 2080: 650
 ram: 120
 case: 45
 power supply: 0 already bought with 1060 (250)
-total:  
+total:  1400
 '''

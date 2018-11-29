@@ -1,53 +1,57 @@
 
+import csv
 import numpy as np
 from numpy import linalg as LA
 import matplotlib.pyplot as plt
 
 
-class DFROriginal:
-    # Parameters
-    n = 10
-    nv = n - 1
-    k1 = 4 * 10
-    k2 = 4 * k1
-    k3 = 4 * k1
-    k = k1 + k2 + k3
-    gain = 0.8
-    scale = 1
-    m = np.array(nv)
-    j = np.zeros(k*nv)
+class Temperature:
+    def __init__(self):
+        self.n = 125  # number of nodes, n-1 virtual nodes
+        self.nv = self.n - 1  # number of virtual nodes = length of mask
+        self.k1 = 4 * self.n  # number of initial input data to initialize reservoir
+        self.k2 = 4 * self.k1  # number of training input data
+        self.k3 = 4 * self.k1  # number of testing input data
+        self.k = self.k1 + self.k2 + self.k3  # number of input data
+        self.gain = 0.8  # feedback gain
+        self.scale = 0.1  # input scaling
+        self.m = np.array(self.nv)  # random vector
+        self.j = np.zeros(self.k * self.nv)  # masked input?
 
-    input = np.array(k)
-    input1 = np.array(k1)
-    input2 = np.array(k2)
-    input3 = np.array(k3)
-    target = np.array(k)
-    target1 = np.array(k2)
-    target2 = np.array(k3)
-    # Reservoir parameters
-    x = np.zeros(n)  # states in NL
-    x_next = np.zeros(n)
-    X = np.zeros((k2, n))
-    x_all = np.zeros((k2 * nv, n))  # states in all nodes
+        self.input = np.array(self.k)
+        self.input1 = np.array(self.k1)  # initial input data
+        self.input2 = np.array(self.k2)  # training input data
+        self.input3 = np.array(self.k3)  # testing input data
+        self.target = np.array(self.k)
+        self.target1 = np.array(self.k2)  # target output for training
+        self.target2 = np.array(self.k3)  # target output for testing
+        # Reservoir parameters
+        self.x = np.zeros(self.n)  # value in reservoir nodes
+        self.x_next = np.zeros(self.n)
+        self.X = np.zeros((self.k2, self.n))  # training states
+        self.x_all = np.zeros((self.k2 * self.nv, self.n))  # states in all nodes
+        self.reg = 1e-8  # regularization coefficient
+        self.w_out = np.zeros(self.n)
+        self.temp = np.zeros(self.k2)
+        self.temp2 = np.zeros(self.k2)
 
-    reg = 1e-8  # regularization coefficient
-    w_out = np.zeros(n)
+        self.output_train = np.zeros(self.k2)
+        self.x_all_test = np.zeros((self.k3 * self.nv, self.n))
+        self.j_test = np.zeros(self.k3 * self.nv)
 
-    temp = np.zeros(k2)
-    temp2 = np.zeros(k2)
-
-    output_train = np.zeros(k2)
-    X_all_test = np.zeros((k3 * nv, n))
-    j_test = np.zeros(k3 * nv)
-
-    X_test = np.zeros((k3, n))
-    output_test = np.zeros(k3)
+        self.X_test = np.zeros((self.k3, self.n))
+        self.output_test = np.zeros(self.k3)
 
     # Define input & actual output data
-    # NARMA10 task- nonlinear auto-regressive moving average
-    def define_input_output(self):
-        # seed = 100
-        self.input, self.target = self.narma10_create(self)
+    def create_input_output(self):
+        arr = np.zeros(10950)
+        with open('temp_nl.csv', newline='') as csvfile:
+            reader = csv.reader(csvfile)
+            for i, row in enumerate(reader):
+                arr[i] = float(row[0])
+        self.input = arr[0: 4500]
+        self.target = arr[4500: 9000]
+
         self.input1 = self.input[0: self.k1]
         self.input2 = self.input[self.k1: self.k1 + self.k2]
         self.input3 = self.input[self.k1 + self.k2:]
@@ -55,27 +59,16 @@ class DFROriginal:
         self.target1 = self.target[self.k1: self.k1 + self.k2]
         self.target2 = self.target[self.k1 + self.k2:]
 
-    @staticmethod
-    def narma10_create(self):
-        #     if second input is present, use it as the random seed
-        #     this allows the use of the same dataset between trails
-
-        input = 0.5 * np.random.uniform(low=0.0, high=1.0, size=self.k)
-        output = np.zeros(self.k)
-
-        for i in range(9, self.k-1):
-            output[i+1] = 0.3 * output[i]\
-                           + 0.05 * output[i] * sum(output[i-9:i]) + 1.5 * input[i] * input[i-9] + 0.1
-
-        return input, output
-
     # Defining mask and masking the input
-    def mask(self):
+    def mask(self, is_mask=True):
         # j is the masked input
         self.m = np.random.uniform(low=0.0, high=1.0, size=self.nv)
         it = np.nditer(self.input, flags=['f_index'])
         while not it.finished:
-            masked_elem = np.dot(it[0], self.m)
+            if is_mask:
+                masked_elem = np.dot(it[0], self.m)
+            else:
+                masked_elem = np.repeat(it[0], self.nv)
             for index, value in enumerate(masked_elem):
                 self.j[it.index * self.nv + index] = value
             it.iternext()
@@ -116,34 +109,34 @@ class DFROriginal:
     def training_error(self):
         self.output_train = np.dot(self.w_out, np.transpose(self.X))
         error_len = self.k2
-        mse = (LA.norm(self.target1 - self.output_train, 2)**2) / error_len
-        nmse = (LA.norm(self.target1 - self.output_train)/LA.norm(self.target1))**2
+        mse = (LA.norm(self.target1 - self.output_train, 2) ** 2) / error_len
+        nmse = (LA.norm(self.target1 - self.output_train) / LA.norm(self.target1)) ** 2
         return mse, nmse
 
     # Testing data through reservoir
     def test(self):
         self.x = np.zeros(self.n)
         self.x_next = np.zeros(self.n)
-        self.j_test = self.j[self.nv*(self.k1+self.k2):len(self.j)]
+        self.j_test = self.j[self.nv * (self.k1 + self.k2):len(self.j)]
 
         # Reservoir initialization
         for i in range(0, self.k1 * self.nv):
             self.x_next[0] = np.tanh(self.scale * self.j[i] + self.gain * self.x[self.n - 1])
             self.x_next[1: self.n] = self.x[0: self.n - 1]
             self.x = self.x_next
-            self.X_all_test[i, :] = self.x
+            self.x_all_test[i, :] = self.x
 
         # Run data through the reservoir and store the node states.
         for i in range(0, self.k3 * self.nv):
             self.x_next[0] = np.tanh(self.scale * self.j_test[i] + self.gain * self.x[self.n - 1])
             self.x_next[1: self.n] = self.x[0: self.n - 1]
             self.x = self.x_next
-            self.X_all_test[i, :] = self.x
+            self.x_all_test[i, :] = self.x
 
         # Consider the data just once everytime it loops around?
         self.temp = np.arange(0, self.k3, 1)
         self.temp2 = self.nv * self.temp
-        self.X_test[self.temp, :] = self.X_all_test[self.temp2, :]
+        self.X_test[self.temp, :] = self.x_all_test[self.temp2, :]
         error_len = self.k3
         self.output_test = np.dot(self.w_out, np.transpose(self.X_test))
         mse_test = (LA.norm(self.target2 - self.output_test, 2) ** 2) / error_len
@@ -158,20 +151,20 @@ class DFROriginal:
         x43 = np.arange(self.k1 + self.k2, self.k, 1)
 
         plt.figure(1)
-        plt.plot(x1, self.j[self.k1 * self.nv: self.k1 * self.nv + 100], marker='x', c=np.random.rand(3,))
+        plt.plot(self.j[self.k1 * self.nv: self.k1 * self.nv + 10 * self.n], marker='x', c=np.random.rand(3, ))
         plt.grid()
         plt.title('Input after Masking')
 
         plt.figure(2)
-        plt.plot(x2, self.output_train, marker='o', c=np.random.rand(3,))
-        plt.plot(x2, self.target1, marker='x', c=np.random.rand(3,))
+        plt.plot(x2, self.output_train, marker='o', c=np.random.rand(3, ))
+        plt.plot(x2, self.target1, marker='x', c=np.random.rand(3, ))
         plt.xlabel('o: Reservoir, x: Actual')
         plt.grid()
         plt.title('Train: Reservoir Output vs Actual Output for NARMA-input')
 
         plt.figure(3)
-        plt.plot(x2, self.output_test, marker='o', c=np.random.rand(3,))
-        plt.plot(x2, self.target2, marker='x', c=np.random.rand(3,))
+        plt.plot(x2, self.output_test, marker='o', c=np.random.rand(3, ))
+        plt.plot(x2, self.target2, marker='x', c=np.random.rand(3, ))
         plt.xlabel('o: Reservoir, x: Actual')
         plt.grid()
         plt.title('Test: Reservoir Output vs Actual Output for NARMA-input')
@@ -180,9 +173,9 @@ class DFROriginal:
         # np.savetxt('narma10_result.csv', mat, delimiter=', ')
 
         plt.figure(4)
-        plt.plot(x41, self.input1, c=np.random.rand(3,))
-        plt.plot(x42, self.input2, c=np.random.rand(3,))
-        plt.plot(x43, self.input3, c=np.random.rand(3,))
+        plt.plot(x41, self.input1, c=np.random.rand(3, ))
+        plt.plot(x42, self.input2, c=np.random.rand(3, ))
+        plt.plot(x43, self.input3, c=np.random.rand(3, ))
         plt.xlabel('Left: Initial, Middle: Training, Right: Testing')
         plt.grid()
         plt.title('Input Sequence')
@@ -197,37 +190,21 @@ class DFROriginal:
         plt.show()
 
 
-def test_divide():
-    a = np.arange(1, 10, 1).reshape((3, 3))
-    b = np.arange(5, 8, 1)
-    c = np.dot(a, b)
-    # d = np.divide(c, a)
-    d1, d3, d4, d5 = np.linalg.lstsq(a, c)
-    print(c)
-    print(d1, d3, d4, d5)
-
-
 def main():
-    f1 = DFROriginal()
-    f1.define_input_output()
-    f1.mask()
-    f1.init_reservoir()
-    plt.figure(7)
-    # plt.plot(f1.x, marker='o', c=np.random.rand(3, ))
-    plt.plot(f1.j, marker='x', c=np.random.rand(3, ))
-    plt.grid()
-    plt.show()
-    f1.train_reservoir()
-    f1.sample_feature()
-    f1.train_output_weights()
-    mse, nmse = f1.training_error()
-    print('mse: ', mse, ', nmse: ',  nmse)
-    mse_test, nmse_test = f1.test()
+    t1 = Temperature()
+    t1.create_input_output()
+    t1.mask(is_mask=True)
+    t1.init_reservoir()
+
+    t1.train_reservoir()
+    t1.sample_feature()
+    t1.train_output_weights()
+    mse, nmse = t1.training_error()
+    print('mse: ', mse, ', nmse: ', nmse)
+    mse_test, nmse_test = t1.test()
     print('mse_test: ', mse_test, ', nmse_test: ', nmse_test)
-    f1.draw_charts()
-    # test_divide()
+    t1.draw_charts()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
-
