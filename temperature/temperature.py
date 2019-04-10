@@ -46,7 +46,7 @@ class Temperature:
     # Define input & actual output data
     def create_input_output(self):
         arr = np.zeros(10950)
-        with open('temp_nl.csv', newline='') as csvfile:
+        with open('temp_sf.csv', newline='') as csvfile:
             reader = csv.reader(csvfile)
             for i, row in enumerate(reader):
                 arr[i] = float(row[0])
@@ -180,7 +180,7 @@ class Temperature:
         plt.plot(self.input, c=np.random.rand(3, ))
         plt.xlabel('Data points')
         degree_sign = u'\N{DEGREE SIGN}'
-        plt.ylabel(degree_sign + 'C')
+        plt.ylabel('Temperature in ' + degree_sign + 'C')
         plt.grid()
         # plt.title('Input Sequence')
 
