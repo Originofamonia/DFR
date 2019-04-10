@@ -23,8 +23,8 @@ class DFRSpiking:
     def sp_noise(self, image, prob):
         sh = image.shape
         output = np.zeros(sh, np.uint8)
-        for i in range(image.shape[0]):
-            for j in range(image.shape[1]):
+        for i in range(sh[0]):
+            for j in range(sh[1]):
                 rand1 = random.random()
                 if rand1 < prob:
                     rand2 = random.random()

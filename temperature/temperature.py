@@ -1,4 +1,5 @@
 
+# -*- coding: utf-8 -*-
 import csv
 import numpy as np
 from numpy import linalg as LA
@@ -173,12 +174,15 @@ class Temperature:
         # np.savetxt('narma10_result.csv', mat, delimiter=', ')
 
         plt.figure(4)
-        plt.plot(x41, self.input1, c=np.random.rand(3, ))
-        plt.plot(x42, self.input2, c=np.random.rand(3, ))
-        plt.plot(x43, self.input3, c=np.random.rand(3, ))
-        plt.xlabel('Left: Initial, Middle: Training, Right: Testing')
+        # plt.plot(x41, self.input1, c=np.random.rand(3, ))
+        # plt.plot(x42, self.input2, c=np.random.rand(3, ))
+        # plt.plot(x43, self.input3, c=np.random.rand(3, ))
+        plt.plot(self.input, c=np.random.rand(3, ))
+        plt.xlabel('Data points')
+        degree_sign = u'\N{DEGREE SIGN}'
+        plt.ylabel(degree_sign + 'C')
         plt.grid()
-        plt.title('Input Sequence')
+        # plt.title('Input Sequence')
 
         plt.figure(5)
         plt.plot(x41, self.target[0: self.k1], c=np.random.rand(3, ))
